@@ -12,12 +12,10 @@ const ClassicTemplate = ({ data, accentColor }) => {
 
     return (
         <div className="max-w-4xl mx-auto p-8 bg-white text-gray-800 leading-relaxed">
-            {/* Header */}
             <header className="text-center mb-8 pb-6 border-b-2" style={{ borderColor: accentColor }}>
                 <h1 className="text-3xl font-bold mb-2" style={{ color: accentColor }}>
                     {data.personal_info?.full_name || "Your Name"}
                 </h1>
-
                 <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600">
                     {data.personal_info?.email && (
                         <div className="flex items-center gap-1">
@@ -52,25 +50,22 @@ const ClassicTemplate = ({ data, accentColor }) => {
                 </div>
             </header>
 
-            {/* ✅ Fixed: was data.professional_summary — state key is Professional_summary */}
-            {data.Professional_summary && (
+            {data.professional_summary && (
                 <section className="mb-6">
                     <h2 className="text-xl font-semibold mb-3" style={{ color: accentColor }}>
                         PROFESSIONAL SUMMARY
                     </h2>
-                    <p className="text-gray-700 leading-relaxed">{data.Professional_summary}</p>
+                    <p className="text-gray-700 leading-relaxed">{data.professional_summary}</p>
                 </section>
             )}
 
-            {/* ✅ Fixed: was data.experience — state key is experiance */}
-            {data.experiance && data.experiance.length > 0 && (
+            {data.experience && data.experience.length > 0 && (
                 <section className="mb-6">
                     <h2 className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
                         PROFESSIONAL EXPERIENCE
                     </h2>
-
                     <div className="space-y-4">
-                        {data.experiance.map((exp, index) => (
+                        {data.experience.map((exp, index) => (
                             <div key={index} className="border-l-3 pl-4" style={{ borderColor: accentColor }}>
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
@@ -92,13 +87,11 @@ const ClassicTemplate = ({ data, accentColor }) => {
                 </section>
             )}
 
-            {/* Projects */}
             {data.project && data.project.length > 0 && (
                 <section className="mb-6">
                     <h2 className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
                         PROJECTS
                     </h2>
-
                     <ul className="space-y-3">
                         {data.project.map((proj, index) => (
                             <div key={index} className="flex justify-between items-start border-l-3 border-gray-300 pl-6">
@@ -112,13 +105,11 @@ const ClassicTemplate = ({ data, accentColor }) => {
                 </section>
             )}
 
-            {/* Education */}
             {data.education && data.education.length > 0 && (
                 <section className="mb-6">
                     <h2 className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
                         EDUCATION
                     </h2>
-
                     <div className="space-y-3">
                         {data.education.map((edu, index) => (
                             <div key={index} className="flex justify-between items-start">
@@ -138,13 +129,11 @@ const ClassicTemplate = ({ data, accentColor }) => {
                 </section>
             )}
 
-            {/* Skills */}
             {data.skills && data.skills.length > 0 && (
                 <section className="mb-6">
                     <h2 className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
                         CORE SKILLS
                     </h2>
-
                     <div className="flex gap-4 flex-wrap">
                         {data.skills.map((skill, index) => (
                             <div key={index} className="text-gray-700">

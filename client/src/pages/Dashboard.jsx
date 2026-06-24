@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { EyeIcon, FilePenLineIcon, LoaderCircleIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloudIcon, XIcon } from 'lucide-react'
-import { dummyResumeData } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import api from '../configs/api'
@@ -24,28 +23,25 @@ const Dashboard = () => {
   const navigate = useNavigate()
 
   const loadAllResumes = async () => {
-   try {
-    const { data } = await api.get('/api/users/resumes', {headers: {
-      Authorization: token}})
+    try {
+      const { data } = await api.get('/api/users/resumes')
       setAllResumes(data.resumes)
-   } catch (error) {
-    toast.error(error?.response?.data?.message ||error.message)
-   }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error.message)
+    }
   }
 
   const createResume = async (event) => {
-  try {
-    event.preventDefault()
-    const { data } = await api.post('/api/resumes/create', {title}, {headers: {
-      Authorization: token
-    }})
-    setAllResumes([...allResumes, data.resume])
-    setTitle('')
-    setShowCreateResume(false)
-    navigate(`/api/builder/${data.resume._id}`)
-  } catch (error) {
-    toast.error(error?.response?.data?.message ||error.message)
-  }
+    try {
+      event.preventDefault()
+      const { data } = await api.post('/api/resumes/create', {title})
+      setAllResumes([...allResumes, data.resume])
+      setTitle('')
+      setShowCreateResume(false)
+      navigate(`/app/builder/${data.resume._id}`)
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error.message)
+    }
   }
 
   const uploadResume = async (event) => {
@@ -53,29 +49,30 @@ const Dashboard = () => {
     setIsLoading(true)
     try {
       const resumeText = await pdfToText(resume)
-      const { data } = await api.post('/api/ai/upload-resume', {title, resumeText}, {headers: {
-      Authorization: token }})
+      const { data } = await api.post('/api/ai/upload-resume', {title, resumeText})
       setTitle('')
       setResume(null)
       setShowUploadResume(false)
       navigate(`/app/builder/${data.resumeId}`)
     } catch (error) {
+      toast.error(error?.response?.data?.message || error.message)
       setIsLoading(false)
     }
-    
   }
 
   const editTitle = async (event) => {
     try {
       event.preventDefault()
-       const {data} = await api.put(`/api/resumes/update `,{resumeId: editResumeId, resumeData: {title}}, {headers: {Authorization: token }})
-       setAllResumes(allResumes.map(resume => resume._id === editResumeId ? {...resume, title} : resume))
-       setTitle('')
-       setEditResumeId('')
-       toast.success(data.message)
-      
+      const formData = new FormData()
+      formData.append('resumeId', editResumeId)
+      formData.append('resumeData', JSON.stringify({title}))
+      const {data} = await api.put('/api/resumes/update', formData)
+      setAllResumes(allResumes.map(resume => resume._id === editResumeId ? {...resume, title} : resume))
+      setTitle('')
+      setEditResumeId('')
+      toast.success(data.message)
     } catch (error) {
-      toast.error(error?.response?.data?.message ||error.message)
+      toast.error(error?.response?.data?.message || error.message)
     }
   }
 
@@ -83,14 +80,12 @@ const Dashboard = () => {
     try {
       const confirm = window.confirm("Are you sure you want to delete this resume?")
       if (confirm) {
-        const {data} = await api.delete(`/api/resume/delete ${resumeId}`, {headers: {
-        Authorization: token }})
+        const {data} = await api.delete(`/api/resumes/delete/${resumeId}`)
         setAllResumes(allResumes.filter(resume => resume._id !== resumeId))
         toast.success(data.message)
       }
-      
     } catch (error) {
-       toast.error(error?.response?.data?.message ||error.message)
+      toast.error(error?.response?.data?.message || error.message)
     }
   }
 
@@ -101,7 +96,7 @@ const Dashboard = () => {
   return (
     <div className='max-w-7xl mx-auto px-4 py-8'>
 
-      <p className='text-2xl font-medium mb-6 bg-linear-to-r from-slate-600 to-slate-700 bg-clip-text text-transparent sm:hidden'>Welcome, Azam</p>
+      <p className='text-2xl font-medium mb-6 bg-linear-to-r from-slate-600 to-slate-700 bg-clip-text text-transparent sm:hidden'>Welcome, {user?.name}</p>
 
       <div className='flex gap-4'>
         <button onClick={() => setShowCreateResume(true)} className='w-full bg-white sm:max-w-36 h-48 flex flex-col items-center justify-center rounded-lg gap-2 text-slate-600 border border-dashed border-slate-300 group hover:border-indigo-500 hover:shadow-lg transition-all duration-300 cursor-pointer'>
@@ -115,7 +110,7 @@ const Dashboard = () => {
         </button>
       </div>
 
-      <hr className='border-slate-300 my-6 sm:w-[305px]' />
+      <hr className='border-slate-300 my-6 sm:w-76.25' />
 
       <div className="grid grid-cols-2 sm:flex flex-wrap gap-4">
         {allResumes.map((resume, index) => {
@@ -130,7 +125,6 @@ const Dashboard = () => {
               <div onClick={e => e.stopPropagation()} className='absolute top-1 right-1 group-hover:flex hidden'>
                 <TrashIcon onClick={() => deleteResume(resume._id)} className='size-7 p-1.5 hover:bg-white/50 rounded' />
                 <PencilIcon onClick={(e) => { e.stopPropagation(); setEditResumeId(resume._id); setTitle(resume.title) }} className='size-7 p-1.5 hover:bg-white/50 rounded' />
-                
                 <EyeIcon onClick={(e) => { e.stopPropagation(); navigate(`/app/view/${resume._id}`) }} className='size-7 p-1.5 hover:bg-white/50 rounded' />
               </div>
             </button>
@@ -171,11 +165,14 @@ const Dashboard = () => {
               <input type="file" id='resume-input' accept='.pdf' hidden onChange={(e) => setResume(e.target.files[0])} />
             </div>
             <button disabled={isLoading} className='w-full bg-green-600 text-white py-2 mt-4 rounded'>
-              {isLoading && <LoaderCircleIcon className='animate-spin size-4 text-white'/>}
-              {isLoading ? 'Uploading ...' : 'Upload Resume'}
-              Upload Resume
-              </button>
-            <XIcon onClick={() => { setShowUploadResume(false); setTitle('') }} className='absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors flex items-center justify-center gap-2'/>
+              {isLoading ? (
+                <span className='flex items-center justify-center gap-2'>
+                  <LoaderCircleIcon className='animate-spin size-4 text-white'/>
+                  Uploading ...
+                </span>
+              ) : 'Upload Resume'}
+            </button>
+            <XIcon onClick={() => { setShowUploadResume(false); setTitle('') }} className='absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors'/>
           </div>
         </form>
       )}

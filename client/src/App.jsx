@@ -15,27 +15,25 @@ const App = () => {
 
   const dispatch = useDispatch()
 
-  const getUserData = async ()=>{
+  const getUserData = async () => {
     const token = localStorage.getItem('token')
     try {
       if(token){
-        const { data} = await  api.get('/api/users/data', {headers: {Authorization: token}})
+        const { data } = await api.get('/api/users/data', {headers: {Authorization: `Bearer ${token}`}})
         if(data.user){
           dispatch(login({token, user: data.user}))
         }
-        dispatch(setLoading(false))
-      }else{
-        dispatch(setLoading(false))
       }
     } catch (error) {
-      dispatch(setLoading(false))
       console.log(error.message)
+    } finally {
+      dispatch(setLoading(false))
     }
-  } 
+  }
 
-  useEffect(()=>{
+  useEffect(() => {
     getUserData()
-  },[])
+  }, [])
 
   return (
     <>
@@ -48,7 +46,6 @@ const App = () => {
         <Route path='builder/:resumeId' element={<ResumeBuilder />} />
       </Route>
       <Route path='app/view/:resumeId' element={<Preview />} />
-
     </Routes>
     </>
   )
